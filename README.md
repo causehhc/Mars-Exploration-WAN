@@ -24,5 +24,6 @@
     + 红外避障模块
     + 通信实时性检测
 # 效果图
+![avatar](PIC/6.jpg) 
 ![avatar](PIC/4.jpg) 
 ![avatar](PIC/2.jpg)
