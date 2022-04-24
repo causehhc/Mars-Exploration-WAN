@@ -1,3 +1,4 @@
+import time
 import pygame
 import sys
 import cv2
@@ -6,25 +7,45 @@ import numpy as np
 from numpy import cos, sin, arccos, arctan2
 import serial
 from socket import *
+import _thread
+
+cam_global = None
+frame_global = None
+thread_flag = None
+
+
+def cap_thread(haha=1):
+    global cam_global
+    global frame_global
+    global thread_flag
+    while True:
+        if thread_flag:
+            if cam_global is not None:
+                ret, frame_global = cam_global.read()
+        else:
+            time.sleep(1)
 
 
 def video_update(cam, screen, thrs):
+    global frame_global
     screen.fill([0, 0, 0])
-    ret, frame = cam.read()
-    frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = np.rot90(frame)
-    frame = cv2.flip(frame, 0, dst=None)
+    # ret, frame = cam.read()
+    frame = frame_global
+    if frame is not None:
+        frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = np.rot90(frame)
+        frame = cv2.flip(frame, 0, dst=None)
 
-    edge = cv2.Canny(frame, thrs[0], thrs[1], apertureSize=5)
-    vis = frame.copy()
-    vis[edge != 0] = (0, 255, 0)
+        edge = cv2.Canny(frame, thrs[0], thrs[1], apertureSize=5)
+        vis = frame.copy()
+        vis[edge != 0] = (0, 255, 0)
 
-    frame = pygame.surfarray.make_surface(frame)
-    screen.blit(frame, (0, 0+60))
+        frame = pygame.surfarray.make_surface(frame)
+        screen.blit(frame, (0, 0 + 60))
 
-    vis = pygame.surfarray.make_surface(vis)
-    screen.blit(vis, (0, 0+60))
+        vis = pygame.surfarray.make_surface(vis)
+        screen.blit(vis, (0, 0 + 60))
 
 
 def event_listener():
@@ -119,6 +140,10 @@ def get_key(exit, gameMouse, thrs, power):
     strafe = keys[pygame.K_d] - keys[pygame.K_a]
     roll = keys[pygame.K_e] - keys[pygame.K_q]
     special = keys[pygame.K_c]
+    if special:
+        special = 1
+    else:
+        special = 0
     if keys[pygame.K_LSHIFT]:
         if power < 95:
             power += 1
@@ -182,21 +207,21 @@ def inform_update(move, mousekeys, mouse_dx_dy, thrs, screen):
     thrs1 = font.render("thrs1: " + str(thrs[0]), False, color3)
     thrs2 = font.render("thrs2: " + str(thrs[1]), False, color3)
 
-    screen.blit(keyboard, (10, 430+60+60))
-    screen.blit(mouseClick, (10, 460+60+60))
-    screen.blit(mouseMove, (10, 490+60+60))
+    screen.blit(keyboard, (10, 430 + 60 + 60))
+    screen.blit(mouseClick, (10, 460 + 60 + 60))
+    screen.blit(mouseMove, (10, 490 + 60 + 60))
     screen.blit(thrs1, (10, 10))
     screen.blit(thrs2, (150, 10))
 
-    pygame.draw.line(screen, color2, (213, 420+60+60), (213, 520+60+60), 2)
-    pygame.draw.line(screen, color2, (356, 420+60+60), (356, 520+60+60), 2)
-    pygame.draw.line(screen, color2, (499, 420+60+60), (499, 520+60+60), 2)
+    pygame.draw.line(screen, color2, (213, 420 + 60 + 60), (213, 520 + 60 + 60), 2)
+    pygame.draw.line(screen, color2, (356, 420 + 60 + 60), (356, 520 + 60 + 60), 2)
+    pygame.draw.line(screen, color2, (499, 420 + 60 + 60), (499, 520 + 60 + 60), 2)
     pygame.draw.line(screen, color2, (0, 60), (640, 60), 2)
-    pygame.draw.line(screen, color2, (0, 420 + 60+60), (640, 420 + 60+60), 2)
+    pygame.draw.line(screen, color2, (0, 420 + 60 + 60), (640, 420 + 60 + 60), 2)
 
-    screen.blit(window2, (218, 425+60+60))
-    screen.blit(window3, (361, 425+60+60))
-    screen.blit(window4, (504, 425+60+60))
+    screen.blit(window2, (218, 425 + 60 + 60))
+    screen.blit(window3, (361, 425 + 60 + 60))
+    screen.blit(window4, (504, 425 + 60 + 60))
 
 
 def init_inform_update(screen, flag):
@@ -226,21 +251,21 @@ def init_inform_update(screen, flag):
         noVideo = font2.render("Connecting...", False, color)
         screen.blit(noVideo, (20, 80))
 
-    screen.blit(keyboard, (10, 430+60+60))
-    screen.blit(mouseClick, (10, 460+60+60))
-    screen.blit(mouseMove, (10, 490+60+60))
+    screen.blit(keyboard, (10, 430 + 60 + 60))
+    screen.blit(mouseClick, (10, 460 + 60 + 60))
+    screen.blit(mouseMove, (10, 490 + 60 + 60))
     screen.blit(thrs1, (10, 10))
     screen.blit(thrs2, (150, 10))
 
-    pygame.draw.line(screen, color2, (213, 420+60+60), (213, 520+60+60), 2)
-    pygame.draw.line(screen, color2, (356, 420+60+60), (356, 520+60+60), 2)
-    pygame.draw.line(screen, color2, (499, 420+60+60), (499, 520+60+60), 2)
+    pygame.draw.line(screen, color2, (213, 420 + 60 + 60), (213, 520 + 60 + 60), 2)
+    pygame.draw.line(screen, color2, (356, 420 + 60 + 60), (356, 520 + 60 + 60), 2)
+    pygame.draw.line(screen, color2, (499, 420 + 60 + 60), (499, 520 + 60 + 60), 2)
     pygame.draw.line(screen, color2, (0, 60), (640, 60), 2)
-    pygame.draw.line(screen, color2, (0, 420+60+60), (640, 420+60+60), 2)
+    pygame.draw.line(screen, color2, (0, 420 + 60 + 60), (640, 420 + 60 + 60), 2)
 
-    screen.blit(window2, (218, 425+60+60))
-    screen.blit(window3, (361, 425+60+60))
-    screen.blit(window4, (504, 425+60+60))
+    screen.blit(window2, (218, 425 + 60 + 60))
+    screen.blit(window3, (361, 425 + 60 + 60))
+    screen.blit(window4, (504, 425 + 60 + 60))
 
 
 def control_ui(angle, move, mouse_dx_dy, mousekeys, screen):
@@ -269,14 +294,14 @@ def control_ui(angle, move, mouse_dx_dy, mousekeys, screen):
         angle[0] = -math.pi
     if angle[0] > 0:
         angle[0] = 0
-    base_x, base_y = 284, 480+60+60
+    base_x, base_y = 284, 480 + 60 + 60
     base_x_2, base_y_2 = p * math.cos(angle[0]) + base_x, p * math.sin(angle[0]) + base_y
     pygame.draw.line(screen, color, (base_x, base_y), (base_x_2, base_y_2), 2)
     """
     车体状态
     """
     angle[5] = 0
-    base_x, base_y = 284, 480+60+60
+    base_x, base_y = 284, 480 + 60 + 60
     roll_x = 15 * cos(angle[5] + math.pi / 4), 15 * cos(angle[5] + 3 * math.pi / 4), \
              15 * cos(angle[5] - 3 * math.pi / 4), 15 * cos(angle[5] - math.pi / 4)
     roll_y = 25 * sin(angle[5] + math.pi / 4), 25 * sin(angle[5] + 3 * math.pi / 4), \
@@ -307,7 +332,7 @@ def control_ui(angle, move, mouse_dx_dy, mousekeys, screen):
         if angle[3] > rotateZoom:
             angle[3] -= rotateZoom
 
-    base_x, base_y = 400, 500+60+60
+    base_x, base_y = 400, 500 + 60 + 60
     x, y = angle[3] * math.cos(angle[2]), angle[3] * math.sin(angle[2])
     pygame.draw.line(screen, (255, 255, 255), (base_x, base_y), (base_x + x, base_y + y), 2)
     """
@@ -368,7 +393,7 @@ def control_ui(angle, move, mouse_dx_dy, mousekeys, screen):
         angle[1] = math.pi / 2
     if angle[1] < math.pi / 4:
         angle[1] = math.pi / 4
-    base_x, base_y = 570, 470 - 15+60+60
+    base_x, base_y = 570, 470 - 15 + 60 + 60
     base_x_2, base_y_2 = p * math.cos(angle[1]) + base_x, p * math.sin(angle[1]) + base_y
     base_x_3, base_y_3 = base_x - p * math.cos(angle[1]), p * math.sin(angle[1]) + base_y
     pygame.draw.line(screen, color, (base_x, base_y), (base_x_2, base_y_2), 2)
@@ -446,22 +471,23 @@ def tcpTrans(TCPSock, ans_angle, move):
 
 
 def connect(flag):
+    global cam_global
     try:
         # 摄像头选择
         if flag == 0:
             cam_address = "http://39.97.120.75:9000/?action=stream"
         elif flag == 1:
-            cam_address = "http://192.168.43.108:8080/?action=stream"
+            cam_address = "http://192.168.2.194:8080/?action=stream"
         else:
             cam_address = 0
-        cam = cv2.VideoCapture(cam_address)
+        cam_global = cv2.VideoCapture(cam_address)
 
         # tcp连接主机
         if flag == 0:
             host = "39.97.120.75"
             port = 4321
         elif flag == 1:
-            host = "192.168.43.108"
+            host = "192.168.2.194"
             port = 12345
         else:
             host = "127.0.0.1"
@@ -469,22 +495,23 @@ def connect(flag):
         address = (host, port)
         TCPSock = socket(AF_INET, SOCK_STREAM)
         TCPSock.connect(address)
-        return cam, TCPSock
+        return cam_global, TCPSock
     except:
         return None, None
 
 
 def start_test(screen, size):
     # 开始程序
+    global cam_global
     clock = pygame.time.Clock()
     clock.tick(60)
     power = 0
     angle = [-math.pi / 2, math.pi / 4, 0, 1, 0, 0]
     thrs = [10000, 10000]
     gameMouse = False
-    cam = cv2.VideoCapture(0)
+    cam_global = cv2.VideoCapture(0)
     exit = False
-    if cam:
+    if cam_global:
         exit = True
     while exit:
         # 事件处理
@@ -493,7 +520,7 @@ def start_test(screen, size):
                 pygame.quit()
                 sys.exit()
         # webcam刷新
-        video_update(cam, screen, thrs)
+        video_update(cam_global, screen, thrs)
         # 键盘按键捕获+处理
         exit, gameMouse, thrs, move, power = get_key(exit, gameMouse, thrs, power)
         # 鼠标捕获+处理
@@ -520,9 +547,9 @@ def start(screen, size):
     angle = [-math.pi / 2, math.pi / 4, 0, 1, 0, 0]
     thrs = [10000, 10000]
     gameMouse = False
-    cam, TCPSock = connect(0)  # 连接下位机
+    cam_global, TCPSock = connect(1)  # 连接下位机
     exit = False
-    if cam and TCPSock:
+    if cam_global and TCPSock:
         exit = True
     while exit:
         # 事件处理
@@ -532,7 +559,7 @@ def start(screen, size):
                 TCPSock.close()
                 sys.exit()
         # webcam刷新
-        video_update(cam, screen, thrs)
+        video_update(cam_global, screen, thrs)
         # 键盘按键捕获+处理
         exit, gameMouse, thrs, move, power = get_key(exit, gameMouse, thrs, power)
         # 鼠标捕获+处理
@@ -552,11 +579,13 @@ def start(screen, size):
 
 
 def main():
+    global thread_flag
     # 各种初始化
     pygame.init()
     pygame.display.set_caption('UI')
-    size = 640, 520+60+60
+    size = 640, 520 + 60 + 60
     screen = pygame.display.set_mode(size)
+    _thread.start_new_thread(cap_thread, (1,))
 
     while True:
         keys = pygame.key.get_pressed()
@@ -571,7 +600,10 @@ def main():
             if keys[pygame.K_CAPSLOCK]:
                 start_test(screen, size)  # 开始执行(本机)
             else:
+                thread_flag = True
                 start(screen, size)  # 开始执行
+                thread_flag = False
+
             screen.fill((0, 0, 0))
             pygame.display.update()
         init_inform_update(screen, 1)
