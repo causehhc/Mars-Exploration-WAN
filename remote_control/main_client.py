@@ -1,4 +1,5 @@
 import time
+
 import pygame
 import sys
 import cv2
@@ -137,8 +138,8 @@ def get_key(exit, gameMouse, thrs, power):
     # print(keys)
     exit, gameMouse, thrs = keyboard_fun(keys, exit, gameMouse, thrs)
     fwd = keys[pygame.K_w] - keys[pygame.K_s]
-    strafe = keys[pygame.K_d] - keys[pygame.K_a]
-    roll = keys[pygame.K_e] - keys[pygame.K_q]
+    strafe = keys[pygame.K_a] - keys[pygame.K_d]
+    roll = keys[pygame.K_q] - keys[pygame.K_e]
     special = keys[pygame.K_c]
     if special:
         special = 1
@@ -165,14 +166,18 @@ def get_mouse(size, gameMouse):
             if event.button == 4 or event.button == 5:
                 mouse_wheel = event.button
     mousekeys = pygame.mouse.get_pressed()
-    # print(mousekeys)
     mousekeys = mousekeys, mouse_wheel
+    temp = [[0, 0, 0], 0]
+    temp[0][0] = 1 if mousekeys[0][0] else 0
+    temp[0][1] = 1 if mousekeys[0][1] else 0
+    temp[0][2] = 1 if mousekeys[0][2] else 0
+    temp[1] = mousekeys[1]
 
     # 鼠标移动捕获+处理
     mouse_dx, mouse_dy = mouse_move_control(size, gameMouse)
     # print(mouse_dx, mouse_dy)
     mouse_dx_dy = mouse_dx, mouse_dy
-    return mousekeys, mouse_dx_dy
+    return temp, mouse_dx_dy
 
 
 def data_analysis(angle, q0, q1, q2):
@@ -543,7 +548,7 @@ def start(screen, size):
     # 开始程序
     clock = pygame.time.Clock()
     clock.tick(60)
-    power = 0
+    power = 10
     angle = [-math.pi / 2, math.pi / 4, 0, 1, 0, 0]
     thrs = [10000, 10000]
     gameMouse = False
