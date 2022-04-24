@@ -42,9 +42,9 @@ def serialTrans_arm(ans_angle, ser):
 
 
 def serialTrans_car(move, ser):
-    cmd = [0xf0, 0x64, 0x64, 0x64, 0xfa]
-    cmd[2] = move[0] * move[3]+100
-    cmd[1] = move[1] * move[3]+100
+    cmd = [0x5b, 0x64, 0x64, 0x64, 0x5d]
+    cmd[1] = move[0] * move[3]+100
+    cmd[2] = move[1] * move[3]+100
     cmd[3] = move[2] * move[3]+100
     # print(cmd)
     ser.write(cmd)
@@ -94,8 +94,8 @@ def main_server(flag):
     ser_arm = 0
     ser_car = 0
     if flag:
-        ser_arm = serial.Serial("/dev/ttyUSB0", 9600, timeout=0.5)
-        ser_car = serial.Serial("/dev/ttyUSB1", 9600, timeout=0.5)
+        ser_arm = serial.Serial("/dev/ttyUSB_arm", 9600, timeout=0.5)
+        ser_car = serial.Serial("/dev/ttyUSB_wheel", 115200, timeout=0.5)
     address = ("0.0.0.0", 12345)  # 允许所有域名访问
     TCPSock = socket(AF_INET, SOCK_STREAM)
     TCPSock.bind(address)
