@@ -2,6 +2,8 @@ import time
 from socket import *
 import serial
 
+now_arm_cmd = []
+
 
 def mapAndTrans(a):
     bit = [0, 0]
@@ -38,7 +40,10 @@ def serialTrans_arm(ans_angle, ser):
     cmd[20] = bit4[0]
     cmd[21] = bit4[1]
 
-    ser.write(cmd)
+    global now_arm_cmd
+    if now_arm_cmd != cmd:
+        ser.write(cmd)
+    now_arm_cmd = cmd.copy()
 
 
 def serialTrans_car(move, ser):
