@@ -137,9 +137,9 @@ def get_key(exit, gameMouse, thrs, power):
     keys = pygame.key.get_pressed()
     # print(keys)
     exit, gameMouse, thrs = keyboard_fun(keys, exit, gameMouse, thrs)
-    fwd = keys[pygame.K_w] - keys[pygame.K_s]
-    strafe = keys[pygame.K_a] - keys[pygame.K_d]
-    roll = keys[pygame.K_q] - keys[pygame.K_e]
+    fwd = keys[pygame.K_s] - keys[pygame.K_w]
+    strafe = keys[pygame.K_d] - keys[pygame.K_a]
+    roll = keys[pygame.K_e] - keys[pygame.K_q]
     special = keys[pygame.K_c]
     if special:
         special = 1
@@ -549,7 +549,7 @@ def start(screen, size):
     clock = pygame.time.Clock()
     clock.tick(60)
     power = 10
-    angle = [-math.pi / 2, math.pi / 4, 0, 1, 0, 0]
+    angle = [0.0, 0.7853981633974483, -0.024, 25, 0.034018108424711, 0]
     thrs = [10000, 10000]
     gameMouse = False
     cam_global, TCPSock = connect(1)  # 连接下位机
